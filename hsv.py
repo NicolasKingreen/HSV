@@ -71,8 +71,6 @@ def rgb_to_hsv_vectorised(a):
     Mis = a.argmax(axis=2)
     ms = a.min(axis=2)
 
-    print(np.where(Ms != 0, 1 - ms/Ms, 0))
-
     Cs = Ms - ms
 
     Hs = np.full(Rs.shape, np.inf)
