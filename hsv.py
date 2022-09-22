@@ -73,11 +73,10 @@ def rgb_to_hsv_vectorised(a):
 
     Cs = Ms - ms
 
-    Hs = np.full(Rs.shape, np.inf)
+    Hs = np.zeros(Rs.shape)
     Hs = np.where(Mis == 0, ((Gs-Bs)/Cs) % 6, Hs)  # max is red
     Hs = np.where(Mis == 1, ((Bs-Rs)/Cs) + 2, Hs)  # max is green
     Hs = np.where(Mis == 2, ((Rs-Gs)/Cs) + 4, Hs)  # max is blue
-    Hs = np.where(Hs == np.inf, 0, Hs)
     Hs *= 60
 
     Vs = Ms
