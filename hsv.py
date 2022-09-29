@@ -155,6 +155,46 @@ def hsv_gradient(a):
     return a
 
 
+def hsv_radial_gradient(a, center=None, radius=1):
+    height, width = a.shape[:2]
+    if center is None:
+        center = width // 2, height // 2
+
+    radius = int(radius * (min(width, height) // 2 - 1))
+    current_radius = radius
+
+    while current_radius > 0:
+        angle = 0.0
+        while angle < 360:
+            angle_in_rads = np.radians(angle)
+            x = int(center[0] + current_radius * np.cos(angle_in_rads))
+            y = int(center[1] + current_radius * np.sin(angle_in_rads))
+            if 0 <= x < width and 0 <= y < height:
+                print(x, y)
+                multiplier = current_radius / radius
+                a[y][x][0] *= multiplier  # changing hue
+                # a[y][x][1] *= multiplier
+                # a[y][x][2] *= multiplier
+            angle += 0.1
+        current_radius -= 1
+
+    return a
+
+
+def hsv_radial_gradient_vectorized(a, center, radius):
+    Hs, Ss, Vs = a[..., 0], a[..., 1], a[..., 2]
+
+    indices = np.dstack(np.indices(a.shape[:2]))
+    da = indices - center
+    distances = np.sqrt(np.power(da[..., 0], 2) + np.power(da[..., 1], 2))
+
+    Hs = np.where((0 <= distances) & (distances <= radius), Hs * distances / radius, Vs)
+    # Vs = np.where((0 <= distances) & (distances <= radius), distances / radius, Vs)
+
+    return np.dstack((Hs, Ss, Vs))
+
+
+
 # test_colors = [(0, 0, 0), (255, 255, 255), (255, 0, 255), (255, 101, 66), (101, 99, 56)]
 # test_colors_hsv = [rgb_to_hsv(color) for color in test_colors]
 #
@@ -171,7 +211,8 @@ pixels = np.array(img)
 
 hsv_img = rgb_to_hsv_vectorised(pixels)
 # hsv_img = hsv_transform(hsv_img)
-hsv_img = hsv_gradient(hsv_img)
+# hsv_img = hsv_gradient(hsv_img)
+hsv_img = hsv_radial_gradient_vectorized(hsv_img, (1000, 1000), 1000)
 back_and_forth = hsv_to_rgb_vectorized(hsv_img)
 plt.imshow(back_and_forth)
 plt.show()
